@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>PetSys ERP · Gestão Inteligente para PetShop</title>
+  <!-- Chart.js CDN + Font Awesome -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- SheetJS (XLSX export) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #f0f4f8;
+    }
+
+    /* Modern gradient header + layout */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* top navbar */
+    .top-nav {
+      background: linear-gradient(135deg, #1E2A3A 0%, #0F1724 100%);
+      color: white;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .logo h2 {
+      font-weight: 600;
+      font-size: 1.6rem;
+      letter-spacing: -0.5px;
+    }
+    .logo span {
+      color: #4fd1c5;
+      font-weight: 400;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0.8rem 0;
+    }
+
+    .nav-btn {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 40px;
+      color: #e2e8f0;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-btn i {
+      font-size: 1rem;
+    }
+    .nav-btn.active {
+      background: #2c7a6e;
+      color: white;
+      box-shadow: 0 4px 12px rgba(44,122,110,0.4);
+    }
+    .nav-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    /* main content */
+    .main-content {
+      padding: 2rem;
+      flex: 1;
+    }
+
+    /* cards & grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.3rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: white;
+      border-radius: 28px;
+      padding: 1.2rem 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+      transition: all 0.2s;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .kpi-card h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5a6874;
+      margin-bottom: 0.5rem;
+    }
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1a2c3e;
+    }
+    .kpi-sub {
+      font-size: 0.8rem;
+      color: #4c9a8a;
+      margin-top: 0.3rem;
+    }
+
+    .chart-row {
+      background: white;
+      border-radius: 28px;
+      padding: 1.2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 28px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-left: 5px solid #2c7a6e;
+      padding-left: 1rem;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-end;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 150px;
+    }
+    .form-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #4a5562;
+    }
+    input, select, button {
+      padding: 0.6rem 0.8rem;
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      width: 100%;
+      font-size: 0.85rem;
+    }
+    button {
+      background: #1e2a3a;
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button.primary {
+      background: #2c7a6e;
+    }
+    button.danger {
+      background: #c53030;
+    }
+    button.small {
+      width: auto;
+      padding: 0.3rem 0.8rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    th, td {
+      padding: 0.7rem 0.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+    .badge {
+      background: #e2f0ee;
+      color: #1f6e5c;
+      border-radius: 40px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .badge.low {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      max-width: 250px;
+    }
+    .export-btn {
+      background: #1f6392;
+    }
+    @media (max-width: 700px) {
+      .main-content { padding: 1rem; }
+      .kpi-value { font-size: 1.3rem; }
+    }
+    i {
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="top-nav">
+    <div class="logo"><h2>Pet<span>Sys</span> ERP</h2></div>
+    <div class="nav-links" id="navLinks">
+      <button class="nav-btn active" data-section="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+      <button class="nav-btn" data-section="clientes"><i class="fas fa-users"></i> Clientes</button>
+      <button class="nav-btn" data-section="estoque"><i class="fas fa-boxes"></i> Estoque</button>
+      <button class="nav-btn" data-section="movimentacoes"><i class="fas fa-exchange-alt"></i> Movimentações</button>
+      <button class="nav-btn" data-section="servicos"><i class="fas fa-cut"></i> Serviços</button>
+      <button class="nav-btn" data-section="exportar"><i class="fas fa-file-excel"></i> Exportar</button>
+    </div>
+  </div>
+  <div class="main-content" id="mainContent">
+    <!-- dynamic sections rendered by JS -->
+  </div>
+</div>
+
+<script>
+  // ---------- DATA STRUCTURES ----------
+  let clientes = JSON.parse(localStorage.getItem('petshop_clientes')) || [];
+  let estoque = JSON.parse(localStorage.getItem('petshop_estoque')) || [];
+  let servicos = JSON.parse(localStorage.getItem('petshop_servicos')) || [];
+  let movimentos = JSON.parse(localStorage.getItem('petshop_movimentos')) || [];
+
+  // Helper: persist all
+  function persistAll() {
+    localStorage.setItem('petshop_clientes', JSON.stringify(clientes));
+    localStorage.setItem('petshop_estoque', JSON.stringify(estoque));
+    localStorage.setItem('petshop_servicos', JSON.stringify(servicos));
+    localStorage.setItem('petshop_movimentos', JSON.stringify(movimentos));
+  }
+
+  // predefined service types with base price
+  const servicosBase = [
+    { nome: "Banho", base: 45.0 },
+    { nome: "Tosa", base: 50.0 },
+    { nome: "Consulta", base: 90.0 },
+    { nome: "Banho + Tosa", base: 85.0 },
+    { nome: "Vacinação", base: 70.0 },
+    { nome: "Hospedagem", base: 120.0 }
+  ];
+  const MARKUP = 1.5;
+
+  // helpers
+  function formatMoney(val) { return `R$ ${val.toFixed(2)}`; }
+  function calcServicePrice(produtoId, quantidadeUsada, servicoBase) {
+    const produto = estoque.find(p => p.id == produtoId);
+    const custoProd = produto ? (produto.custoUnitario * quantidadeUsada) : 0;
+    const precoFinal = servicoBase + (custoProd * MARKUP);
+    return { custoProd, precoFinal, lucro: precoFinal - custoProd, margem: precoFinal ? ((precoFinal - custoProd)/precoFinal)*100 : 0 };
+  }
+
+  // update stock when service uses product
+  function consumirProduto(produtoId, qtd) {
+    const idx = estoque.findIndex(p => p.id == produtoId);
+    if(idx !== -1 && estoque[idx].quantidade >= qtd) {
+      estoque[idx].quantidade -= qtd;
+      persistAll();
+      return true;
+    }
+    return false;
+  }
+
+  // registro serviço com validação estoque
+  function registrarServico(clienteId, servicoNome, produtoId, quantidadeUsada) {
+    const cliente = clientes.find(c => c.id == clienteId);
+    if(!cliente) return { error: "Cliente não encontrado" };
+    const servicoTipo = servicosBase.find(s => s.nome === servicoNome);
+    if(!servicoTipo) return { error: "Serviço inválido" };
+    const produto = estoque.find(p => p.id == produtoId);
+    if(!produto && quantidadeUsada > 0) return { error: "Produto não existe" };
+    if(produto && produto.quantidade < quantidadeUsada) return { error: "Estoque insuficiente" };
+    const { custoProd, precoFinal, lucro, margem } = calcServicePrice(produtoId, quantidadeUsada, servicoTipo.base);
+    if(produto && quantidadeUsada > 0) consumirProduto(produtoId, quantidadeUsada);
+    const novoServico = {
+      id: Date.now(),
+      clienteId: cliente.id,
+      clienteNome: cliente.nome,
+      servicoNome,
+      produtoUtilizado: produto ? produto.nome : "Nenhum",
+      produtoId: produtoId || null,
+      quantidade: quantidadeUsada,
+      custoProdutos: custoProd,
+      preco: precoFinal,
+      lucro: lucro,
+      margem: margem,
+      data: new Date().toISOString()
+    };
+    servicos.push(novoServico);
+    // atualizar ultima visita do cliente
+    cliente.ultimaVisita = new Date().toISOString();
+    cliente.totalServicos = (cliente.totalServicos || 0) + 1;
+    persistAll();
+    return { success: true, servico: novoServico };
+  }
+
+  // atualizar KPIs e gráfico
+  let revenueChart = null;
+
+  function getKPIs() {
+    const receitaTotal = servicos.reduce((sum, s) => sum + s.preco, 0);
+    const custoTotalProd = servicos.reduce((sum, s) => sum + s.custoProdutos, 0);
+    const margemBrutaVal = receitaTotal - custoTotalProd;
+    const margemPercent = receitaTotal ? (margemBrutaVal / receitaTotal) * 100 : 0;
+    const numServicos = servicos.length;
+    const ticketMedio = numServicos ? receitaTotal / numServicos : 0;
+    const totalProdConsumido = servicos.reduce((acc, s) => acc + s.quantidade, 0);
+    const consumoMedio = numServicos ? totalProdConsumido / numServicos : 0;
+    // giro estoque: quantidade total consumida / estoque médio (simplificado: estoque médio = total valor / custo médio, mas giro simples qtd consumida / media quantidade disponivel)
+    const estoqueTotalQtd = estoque.reduce((acc, p) => acc + p.quantidade, 0);
+    const giro = estoqueTotalQtd ? totalProdConsumido / (estoqueTotalQtd + 0.001) : 0;
+    // tempo médio entre visitas: para clientes com mais de 1 serviço
+    let diffs = [];
+    clientes.forEach(c => {
+      const visits = servicos.filter(s => s.clienteId === c.id).sort((a,b)=> new Date(a.data) - new Date(b.data));
+      for(let i=1; i<visits.length; i++) {
+        const diffDays = (new Date(visits[i].data) - new Date(visits[i-1].data)) / (1000*3600*24);
+        if(diffDays>0) diffs.push(diffDays);
+      }
+    });
+    const tempoMedioVisitas = diffs.length ? diffs.reduce((a,b)=>a+b,0)/diffs.length : 0;
+    return { receitaTotal, custoTotalProd, margemBrutaVal, margemPercent, ticketMedio, consumoMedio, giro, tempoMedioVisitas, numServicos };
+  }
+
+  function getReceitaPorDia() {
+    const last30 = [];
+    for(let i=29; i>=0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate()-i);
+      const dateStr = d.toISOString().slice(0,10);
+      const total = servicos.filter(s => s.data.slice(0,10) === dateStr).reduce((acc,s)=>acc+s.preco,0);
+      last30.push({date: dateStr.slice(5), revenue: total});
+    }
+    return last30;
+  }
+
+  function renderDashboard() {
+    const kpis = getKPIs();
+    const receitaDiaria = getReceitaPorDia();
+    const html = `
+      <div class="kpi-grid">
+        <div class="kpi-card"><h4>Receita Total</h4><div class="kpi-value">${formatMoney(kpis.receitaTotal)}</div></div>
+        <div class="kpi-card"><h4>Custo Produtos</h4><div class="kpi-value">${formatMoney(kpis.custoTotalProd)}</div></div>
+        <div class="kpi-card"><h4>Margem Bruta</h4><div class="kpi-value">${formatMoney(kpis.margemBrutaVal)}</div><div class="kpi-sub">${kpis.margemPercent.toFixed(1)}%</div></div>
+        <div class="kpi-card"><h4>Ticket Médio</h4><div class="kpi-value">${formatMoney(kpis.ticketMedio)}</div></div>
+        <div class="kpi-card"><h4>Consumo Médio Prod/Serv</h4><div class="kpi-value">${kpis.consumoMedio.toFixed(2)} un</div></div>
+        <div class="kpi-card"><h4>Giro Estoque</h4><div class="kpi-value">${kpis.giro.toFixed(2)}</div></div>
+        <div class="kpi-card"><h4>Tempo Médio Visitas</h4><div class="kpi-value">${kpis.tempoMedioVisitas.toFixed(1)} dias</div></div>
+        <div class="kpi-card"><h4>Total Serviços</h4><div class="kpi-value">${kpis.numServicos}</div></div>
+      </div>
+      <div class="chart-row"><canvas id="revenueChartCanvas" width="400" height="200" style="max-height:300px; width:100%"></canvas></div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+    const ctx = document.getElementById('revenueChartCanvas').getContext('2d');
+    if(revenueChart) revenueChart.destroy();
+    revenueChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: receitaDiaria.map(d=>d.date), datasets: [{ label: 'Receita diária (R$)', data: receitaDiaria.map(d=>d.revenue), borderColor: '#2c7a6e', tension: 0.3, fill: false }] },
+      options: { responsive: true, maintainAspectRatio: true }
+    });
+  }
+
+  function renderClientes() {
+    const searchHtml = `<div class="filter-bar"><input type="text" id="searchCliente" class="search-input" placeholder="Buscar por nome..."></div>`;
+    let tableRows = clientes.map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.email}</td><td>${new Date(c.dataCadastro).toLocaleDateString()}</td><td>${c.totalServicos||0}</td><td>${c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString() : '--'}</td><td><button class="small danger" onclick="excluirCliente(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+    const form = `
+      <div class="section-card">
+        <div class="section-title"><i class="fas fa-user-plus"></i> Novo Cliente</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Nome</label><input type="text" id="cliNome" placeholder="Nome completo"></div>
+          <div class="form-group"><label>Telefone</label><input type="text" id="cliTelefone"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="cliEmail"></div>
+          <div class="form-group"><button class="primary" id="addClienteBtn"><i class="fas fa-save"></i> Salvar</button></div>
+        </div>
+      </div>
+      <div class="section-card"><div class="section-title"><i class="fas fa-list"></i> Lista de Clientes</div>${searchHtml}<div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Cadastro</th><th>Serviços</th><th>Última Visita</th><th></th></tr></thead><tbody id="clientesTbody">${tableRows}</tbody></table></div></div>
+    `;
+    document.getElementById('mainContent').innerHTML = form;
+    document.getElementById('addClienteBtn').onclick = () => {
+      const nome = document.getElementById('cliNome').value.trim();
+      if(!nome) return alert("Nome obrigatório");
+      const novo = { id: Date.now(), nome, telefone: document.getElementById('cliTelefone').value, email: document.getElementById('cliEmail').value, dataCadastro: new Date().toISOString(), totalServicos: 0, ultimaVisita: null };
+      clientes.push(novo);
+      persistAll();
+      renderClientes();
+    };
+    document.getElementById('searchCliente').addEventListener('keyup', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = clientes.filter(c => c.nome.toLowerCase().includes(term));
+      const tbody = document.getElementById('clientesTbody');
+      tbody.innerHTML = filtered.map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.email}</td><td>${new Date(c.dataCadastro).toLocaleDateString()}</td><td>${c.totalServicos||0}</td><td>${c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString() : '--'}</td><td><button class="small danger" onclick="excluirCliente(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+    });
+  }
+
+  window.excluirCliente = (id) => { clientes = clientes.filter(c=>c.id !== id); persistAll(); renderClientes(); };
+
+  function renderEstoque() {
+    const totalEstoqueValor = estoque.reduce((acc,p)=> acc + (p.custoUnitario * p.quantidade),0);
+    const kpis = getKPIs();
+    const consumoMedio = kpis.consumoMedio;
+    const giro = kpis.giro;
+    const form = `
+      <div class="section-card"><div class="section-title"><i class="fas fa-cubes"></i> Adicionar Produto</div><div class="form-grid"><div class="form-group"><label>Nome</label><input id="prodNome"></div><div class="form-group"><label>Custo unitário (R$)</label><input id="prodCusto" type="number" step="0.01"></div><div class="form-group"><label>Quantidade inicial</label><input id="prodQtd" type="number" step="1" value="0"></div><div class="form-group"><button class="primary" id="addProdBtn">+ Adicionar</button></div></div></div>
+      <div class="section-card"><div class="section-title">KPIs Estoque</div><div class="kpi-grid" style="margin-bottom:0"><div class="kpi-card"><h4>Valor total em estoque</h4><div class="kpi-value">${formatMoney(totalEstoqueValor)}</div></div><div class="kpi-card"><h4>Consumo médio por serviço</h4><div class="kpi-value">${consumoMedio.toFixed(2)} un</div></div><div class="kpi-card"><h4>Giro de estoque</h4><div class="kpi-value">${giro.toFixed(2)}</div></div></div></div>
+      <div class="section-card"><div class="section-title">Produtos</div><div style="overflow-x:auto"><table><thead><tr><th>Produto</th><th>Custo Unit.</th><th>Quantidade</th><th>Valor Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="estoqueTbody">${estoque.map(p => `<tr><td>${p.nome}</td><td>${formatMoney(p.custoUnitario)}</td><td>${p.quantidade}</td><td>${formatMoney(p.custoUnitario * p.quantidade)}</td><td>${p.quantidade < 10 ? '<span class="badge low">Baixo estoque</span>' : '<span class="badge">OK</span>'}</td><td><button class="small danger" onclick="excluirProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div></div>
+    `;
+    document.getElementById('mainContent').innerHTML = form;
+    document.getElementById('addProdBtn').onclick = () => {
+      const nome = document.getElementById('prodNome').value.trim();
+      const custo = parseFloat(document.getElementById('prodCusto').value);
+      const qtd = parseInt(document.getElementById('prodQtd').value);
+      if(!nome || isNaN(custo) || isNaN(qtd)) return alert("Preencha todos os campos");
+      estoque.push({ id: Date.now(), nome, custoUnitario: custo, quantidade: qtd });
+      persistAll();
+      renderEstoque();
+    };
+  }
+  window.excluirProduto = (id) => { estoque = estoque.filter(p=>p.id !== id); persistAll(); renderEstoque(); };
+
+  function renderMovimentacoes() {
+    const form = `<div class="section-card"><div class="section-title"><i class="fas fa-dolly"></i> Registrar Movimentação</div><div class="form-grid"><div class="form-group"><label>Produto</label><select id="movProduto">${estoque.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('')}</select></div><div class="form-group"><label>Tipo</label><select id="movTipo"><option>Entrada</option><option>Saída</option></select></div><div class="form-group"><label>Quantidade</label><input id="movQtd" type="number" step="1"></div><div class="form-group"><label>Observação</label><input id="movObs"></div><div class="form-group"><button class="primary" id="addMovBtn">Registrar</button></div></div></div>
+    <div class="section-card"><div class="section-title">Histórico</div><div class="filter-bar"><input id="filterDataMov" placeholder="Filtrar data (YYYY-MM-DD)"><select id="filterTipoMov"><option value="">Todos</option><option>Entrada</option><option>Saída</option></select><button id="limparFiltrosMov">Limpar</button></div><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody id="movTbody">${movimentos.map(m=>`<tr><td>${new Date(m.data).toLocaleString()}</td><td>${m.produtoNome}</td><td>${m.tipo}</td><td>${m.quantidade}</td><td>${m.obs||''}</td></tr>`).join('')}</tbody></table></div></div>`;
+    document.getElementById('mainContent').innerHTML = form;
+    document.getElementById('addMovBtn').onclick = () => {
+      const prodId = parseInt(document.getElementById('movProduto').value);
+      const produto = estoque.find(p=>p.id===prodId);
+      if(!produto) return alert("Produto não encontrado");
+      const tipo = document.getElementById('movTipo').value;
+      let qtd = parseInt(document.getElementById('movQtd').value);
+      if(isNaN(qtd) || qtd<=0) return alert("Quantidade válida");
+      const obs = document.getElementById('movObs').value;
+      if(tipo === "Saída" && produto.quantidade < qtd) return alert("Estoque insuficiente");
+      if(tipo === "Entrada") produto.quantidade += qtd;
+      else produto.quantidade -= qtd;
+      movimentos.push({ id: Date.now(), produtoId: prodId, produtoNome: produto.nome, tipo, quantidade: qtd, obs, data: new Date().toISOString() });
+      persistAll();
+      renderMovimentacoes();
+    };
+    const filtrar = () => {
+      let filtered = [...movimentos];
+      const dataFiltro = document.getElementById('filterDataMov').value;
+      const tipoFiltro = document.getElementById('filterTipoMov').value;
+      if(dataFiltro) filtered = filtered.filter(m=>m.data.slice(0,10) === dataFiltro);
+      if(tipoFiltro) filtered = filtered.filter(m=>m.tipo === tipoFiltro);
+      const tbody = document.getElementById('movTbody');
+      tbody.innerHTML = filtered.map(m=>`<tr><td>${new Date(m.data).toLocaleString()}</td><td>${m.produtoNome}</td><td>${m.tipo}</td><td>${m.quantidade}</td><td>${m.obs||''}</td></tr>`).join('');
+    };
+    document.getElementById('filterDataMov').addEventListener('input', filtrar);
+    document.getElementById('filterTipoMov').addEventListener('change', filtrar);
+    document.getElementById('limparFiltrosMov').onclick = () => { document.getElementById('filterDataMov').value = ''; document.getElementById('filterTipoMov').value = ''; filtrar(); };
+  }
+
+  function renderServicos() {
+    const clientesOpt = clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+    const produtosOpt = `<option value="">Nenhum</option>`+estoque.map(p=>`<option value="${p.id}">${p.nome} (R$ ${p.custoUnitario.toFixed(2)})</option>`).join('');
+    const servicosOpt = servicosBase.map(s=>`<option value="${s.nome}">${s.nome} - base R$ ${s.base.toFixed(2)}</option>`).join('');
+    const historicoRows = servicos.map(s=>`<tr><td>${new Date(s.data).toLocaleDateString()}</td><td>${s.clienteNome}</td><td>${s.servicoNome}</td><td>${s.produtoUtilizado}</td><td>${s.quantidade}</td><td>${formatMoney(s.custoProdutos)}</td><td>${formatMoney(s.preco)}</td><td>${formatMoney(s.lucro)}</td><td>${s.margem.toFixed(1)}%</td></tr>`).join('');
+    const html = `
+      <div class="section-card"><div class="section-title"><i class="fas fa-bath"></i> Registrar Serviço</div><div class="form-grid"><div class="form-group"><label>Cliente</label><select id="servCliente">${clientesOpt}</select></div><div class="form-group"><label>Tipo Serviço</label><select id="servTipo">${servicosOpt}</select></div><div class="form-group"><label>Produto utilizado</label><select id="servProduto">${produtosOpt}</select></div><div class="form-group"><label>Quantidade</label><input id="servQtd" type="number" value="0" step="1"></div><div class="form-group"><button class="primary" id="registrarServBtn">Registrar Serviço</button></div></div></div>
+      <div class="section-card"><div class="section-title">Histórico de Serviços</div><div class="filter-bar"><input id="filtroClienteServ" placeholder="Filtrar por cliente"><input id="filtroDataServ" type="date" placeholder="Data"><button id="limparFiltroServ">Limpar</button></div><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Cliente</th><th>Serviço</th><th>Produto</th><th>Qtd</th><th>Custo</th><th>Preço</th><th>Lucro</th><th>Margem</th></tr></thead><tbody id="servicosTbody">${historicoRows}</tbody></table></div></div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+    document.getElementById('registrarServBtn').onclick = () => {
+      const clienteId = parseInt(document.getElementById('servCliente').value);
+      const servNome = document.getElementById('servTipo').value;
+      const prodIdVal = document.getElementById('servProduto').value;
+      const produtoId = prodIdVal ? parseInt(prodIdVal) : null;
+      const qtd = parseInt(document.getElementById('servQtd').value) || 0;
+      const res = registrarServico(clienteId, servNome, produtoId, qtd);
+      if(res.error) alert(res.error);
+      else { alert("Serviço registrado com sucesso!"); renderServicos(); }
+    };
+    function filterServicos() {
+      let filtered = [...servicos];
+      const cliFilter = document.getElementById('filtroClienteServ').value.toLowerCase();
+      const dateFilter = document.getElementById('filtroDataServ').value;
+      if(cliFilter) filtered = filtered.filter(s=>s.clienteNome.toLowerCase().includes(cliFilter));
+      if(dateFilter) filtered = filtered.filter(s=>s.data.slice(0,10) === dateFilter);
+      const tbody = document.getElementById('servicosTbody');
+      tbody.innerHTML = filtered.map(s=>`<tr><td>${new Date(s.data).toLocaleDateString()}</td><td>${s.clienteNome}</td><td>${s.servicoNome}</td><td>${s.produtoUtilizado}</td><td>${s.quantidade}</td><td>${formatMoney(s.custoProdutos)}</td><td>${formatMoney(s.preco)}</td><td>${formatMoney(s.lucro)}</td><td>${s.margem.toFixed(1)}%</td></tr>`).join('');
+    }
+    document.getElementById('filtroClienteServ').addEventListener('keyup', filterServicos);
+    document.getElementById('filtroDataServ').addEventListener('change', filterServicos);
+    document.getElementById('limparFiltroServ').onclick = () => { document.getElementById('filtroClienteServ').value = ''; document.getElementById('filtroDataServ').value = ''; filterServicos(); };
+  }
+
+  function exportarExcel() {
+    const wb = XLSX.utils.book_new();
+    const clientesSheet = XLSX.utils.json_to_sheet(clientes.map(c=>({ ID:c.id, Nome:c.nome, Telefone:c.telefone, Email:c.email, Cadastro:c.dataCadastro, TotalServicos:c.totalServicos, UltimaVisita:c.ultimaVisita })));
+    const estoqueSheet = XLSX.utils.json_to_sheet(estoque);
+    const servicosSheet = XLSX.utils.json_to_sheet(servicos);
+    const movSheet = XLSX.utils.json_to_sheet(movimentos);
+    XLSX.utils.book_append_sheet(wb, clientesSheet, "Clientes");
+    XLSX.utils.book_append_sheet(wb, estoqueSheet, "Estoque");
+    XLSX.utils.book_append_sheet(wb, servicosSheet, "Servicos");
+    XLSX.utils.book_append_sheet(wb, movSheet, "Movimentacoes");
+    XLSX.writeFile(wb, `petshop_export_${new Date().toISOString().slice(0,19)}.xlsx`);
+  }
+
+  function renderExportar() {
+    document.getElementById('mainContent').innerHTML = `<div class="section-card"><div class="section-title"><i class="fas fa-download"></i> Exportação de Dados</div><p>Exporte todas as tabelas do sistema para Excel (XLSX).</p><button id="exportExcelBtn" class="primary" style="margin-top:1rem;"><i class="fas fa-file-excel"></i> Exportar para Excel</button></div>`;
+    document.getElementById('exportExcelBtn').onclick = exportarExcel;
+  }
+
+  function switchSection(section) {
+    if(section === 'dashboard') renderDashboard();
+    else if(section === 'clientes') renderClientes();
+    else if(section === 'estoque') renderEstoque();
+    else if(section === 'movimentacoes') renderMovimentacoes();
+    else if(section === 'servicos') renderServicos();
+    else if(section === 'exportar') renderExportar();
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      if(btn.dataset.section === section) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchSection(btn.dataset.section));
+  });
+  // default dashboard
+  switchSection('dashboard');
+</script>
+</body>
+</html>
