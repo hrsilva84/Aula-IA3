@@ -1,563 +1,1200 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>PetSys ERP · Gestão Inteligente para PetShop</title>
-  <!-- Chart.js CDN + Font Awesome -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- SheetJS (XLSX export) -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetSys ERP · Gestão Inteligente para PetShop</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-    body {
-      background: #f0f4f8;
-    }
+:root{
+  --bg:#f7f5f2;
+  --bg2:#f0ede8;
+  --bg3:#e8e4dd;
+  --surface:#ffffff;
+  --surface2:#faf9f7;
+  --border:#ddd9d2;
+  --border2:#ccc7bf;
+  --text:#1a1814;
+  --text2:#5c574f;
+  --text3:#9c978e;
+  --accent:#2d6a4f;
+  --accent-light:#e8f4ee;
+  --accent2:#c17b3f;
+  --accent2-light:#fdf3e8;
+  --danger:#c0392b;
+  --danger-light:#fdf0ee;
+  --warn:#d4700a;
+  --warn-light:#fef4e8;
+  --info:#1a5276;
+  --info-light:#eaf2f8;
+  --radius:10px;
+  --radius-sm:7px;
+  --radius-lg:16px;
+  --font:'DM Sans',sans-serif;
+  --font-display:'Syne',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 12px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.05);
+}
 
-    /* Modern gradient header + layout */
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 
-    /* top navbar */
-    .top-nav {
-      background: linear-gradient(135deg, #1E2A3A 0%, #0F1724 100%);
-      color: white;
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
+/* ── SIDEBAR ── */
+.layout{display:flex;min-height:100vh}
 
-    .logo h2 {
-      font-weight: 600;
-      font-size: 1.6rem;
-      letter-spacing: -0.5px;
-    }
-    .logo span {
-      color: #4fd1c5;
-      font-weight: 400;
-    }
+.sidebar{
+  width:220px;
+  min-height:100vh;
+  background:var(--text);
+  display:flex;
+  flex-direction:column;
+  position:fixed;
+  left:0;top:0;bottom:0;
+  z-index:50;
+  transition:width 0.2s;
+}
 
-    .nav-links {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      padding: 0.8rem 0;
-    }
+.sidebar-logo{
+  padding:28px 20px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.logo-mark{
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-0.03em;
+  line-height:1;
+}
+.logo-mark span{color:var(--accent2);font-weight:400}
+.logo-sub{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:0.12em;text-transform:uppercase;margin-top:4px}
 
-    .nav-btn {
-      background: rgba(255,255,255,0.08);
-      border: none;
-      padding: 0.6rem 1.3rem;
-      border-radius: 40px;
-      color: #e2e8f0;
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-btn i {
-      font-size: 1rem;
-    }
-    .nav-btn.active {
-      background: #2c7a6e;
-      color: white;
-      box-shadow: 0 4px 12px rgba(44,122,110,0.4);
-    }
-    .nav-btn:hover:not(.active) {
-      background: rgba(255,255,255,0.2);
-      transform: translateY(-2px);
-    }
+.sidebar-nav{padding:12px 0;flex:1}
+.nav-section-label{
+  font-size:9px;
+  font-weight:600;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.25);
+  padding:12px 20px 6px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 20px;
+  font-size:13px;
+  font-weight:500;
+  color:rgba(255,255,255,0.5);
+  cursor:pointer;
+  transition:all 0.15s;
+  border-left:3px solid transparent;
+  font-family:var(--font);
+  background:none;
+  border-right:none;
+  border-top:none;
+  border-bottom:none;
+  width:100%;
+  text-align:left;
+  letter-spacing:-0.01em;
+}
+.nav-item:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.05)}
+.nav-item.active{
+  color:#fff;
+  background:rgba(255,255,255,0.08);
+  border-left-color:var(--accent2);
+}
+.nav-icon{width:16px;text-align:center;font-size:14px;opacity:0.8}
 
-    /* main content */
-    .main-content {
-      padding: 2rem;
-      flex: 1;
-    }
+.sidebar-footer{
+  padding:16px 20px;
+  border-top:1px solid rgba(255,255,255,0.07);
+  font-size:11px;
+  color:rgba(255,255,255,0.25);
+}
+.sidebar-footer strong{display:block;color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:2px}
 
-    /* cards & grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.3rem;
-      margin-bottom: 2rem;
-    }
-    .kpi-card {
-      background: white;
-      border-radius: 28px;
-      padding: 1.2rem 1rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.03);
-      transition: all 0.2s;
-      border: 1px solid rgba(0,0,0,0.03);
-    }
-    .kpi-card h4 {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #5a6874;
-      margin-bottom: 0.5rem;
-    }
-    .kpi-value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #1a2c3e;
-    }
-    .kpi-sub {
-      font-size: 0.8rem;
-      color: #4c9a8a;
-      margin-top: 0.3rem;
-    }
+/* ── MAIN ── */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 
-    .chart-row {
-      background: white;
-      border-radius: 28px;
-      padding: 1.2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+.topbar{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:40;
+}
+.page-title{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:-0.02em}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.avatar{
+  width:32px;height:32px;
+  border-radius:50%;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;
+  font-family:var(--font-display);
+}
+.topbar-date{font-size:12px;color:var(--text3);font-family:var(--font-mono)}
 
-    .section-card {
-      background: white;
-      border-radius: 28px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-    }
+/* ── CONTENT ── */
+.content{padding:24px 28px;flex:1}
 
-    .section-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 1.2rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-left: 5px solid #2c7a6e;
-      padding-left: 1rem;
-    }
+/* ── SECTION HEADER ── */
+.section-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+.section-heading{
+  font-family:var(--font-display);
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:-0.02em;
+}
+.section-sub{font-size:12px;color:var(--text3);margin-top:2px}
 
-    .form-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      align-items: flex-end;
-    }
-    .form-group {
-      flex: 1;
-      min-width: 150px;
-    }
-    .form-group label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #4a5562;
-    }
-    input, select, button {
-      padding: 0.6rem 0.8rem;
-      border-radius: 16px;
-      border: 1px solid #cbd5e1;
-      background: white;
-      width: 100%;
-      font-size: 0.85rem;
-    }
-    button {
-      background: #1e2a3a;
-      color: white;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    button.primary {
-      background: #2c7a6e;
-    }
-    button.danger {
-      background: #c53030;
-    }
-    button.small {
-      width: auto;
-      padding: 0.3rem 0.8rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-    }
-    th, td {
-      padding: 0.7rem 0.5rem;
-      border-bottom: 1px solid #e2e8f0;
-      text-align: left;
-    }
-    .badge {
-      background: #e2f0ee;
-      color: #1f6e5c;
-      border-radius: 40px;
-      padding: 0.2rem 0.6rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-    .badge.low {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-    .filter-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-    .search-input {
-      max-width: 250px;
-    }
-    .export-btn {
-      background: #1f6392;
-    }
-    @media (max-width: 700px) {
-      .main-content { padding: 1rem; }
-      .kpi-value { font-size: 1.3rem; }
-    }
-    i {
-      margin-right: 4px;
-    }
-  </style>
+/* ── KPI CARDS ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:18px 20px;
+  position:relative;
+  overflow:hidden;
+  transition:box-shadow 0.2s;
+}
+.kpi:hover{box-shadow:var(--shadow-md)}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.kpi-value{font-family:var(--font-display);font-size:26px;font-weight:700;letter-spacing:-0.03em;color:var(--text)}
+.kpi-badge{
+  display:inline-block;
+  font-size:10px;
+  font-weight:600;
+  padding:2px 8px;
+  border-radius:20px;
+  margin-top:6px;
+  font-family:var(--font-mono);
+}
+.kpi-badge.up{background:var(--accent-light);color:var(--accent)}
+.kpi-badge.neutral{background:var(--bg2);color:var(--text3)}
+.kpi-badge.warn{background:var(--warn-light);color:var(--warn)}
+.kpi-accent{
+  position:absolute;
+  right:16px;top:16px;
+  font-size:22px;
+  opacity:0.12;
+}
+
+/* ── CHART ── */
+.chart-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:20px 22px;
+  margin-bottom:20px;
+}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-family:var(--font-display);font-size:14px;font-weight:600;letter-spacing:-0.01em}
+.chart-wrap{position:relative;height:200px}
+
+/* ── PANELS ── */
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.panel-header{
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:var(--surface2);
+}
+.panel-title{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px}
+.panel-title .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.panel-title .dot.amber{background:var(--accent2)}
+.panel-body{padding:20px}
+
+/* ── GRID FORMS ── */
+.form-grid{display:grid;gap:12px}
+.fg-2{grid-template-columns:1fr 1fr}
+.fg-3{grid-template-columns:1fr 1fr 1fr}
+.fg-4{grid-template-columns:1fr 1fr 1fr auto}
+.fg-5{grid-template-columns:1fr 1fr 1fr 1fr auto}
+
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3)}
+.field input,.field select,.field textarea{
+  font-family:var(--font);
+  font-size:13px;
+  padding:9px 12px;
+  background:var(--bg);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  transition:border-color 0.15s,box-shadow 0.15s;
+  outline:none;
+  width:100%;
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(45,106,79,0.1);
+  background:var(--surface);
+}
+.field input::placeholder{color:var(--text3)}
+.field select option{background:var(--surface);color:var(--text)}
+
+/* ── BUTTONS ── */
+.btn{
+  font-family:var(--font);
+  font-size:12px;
+  font-weight:600;
+  padding:9px 16px;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  border:1.5px solid transparent;
+  transition:all 0.15s;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  letter-spacing:-0.01em;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#245c43;box-shadow:0 4px 12px rgba(45,106,79,0.3)}
+.btn-amber{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.btn-amber:hover{background:#a86a34;box-shadow:0 4px 12px rgba(193,123,63,0.3)}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
+.btn-ghost:hover{background:var(--bg2);color:var(--text)}
+.btn-danger{background:var(--danger-light);color:var(--danger);border-color:rgba(192,57,43,0.2)}
+.btn-danger:hover{background:#fce0dd}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:5px}
+.btn-icon{padding:7px;width:32px;height:32px;justify-content:center}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{
+  background:var(--bg2);
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--text3);
+  padding:10px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--bg2);transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg)}
+tbody td{padding:10px 14px;color:var(--text);vertical-align:middle}
+.td-mono{font-family:var(--font-mono);font-size:12px}
+.td-bold{font-weight:600}
+.td-muted{color:var(--text3)}
+.td-actions{display:flex;gap:6px;align-items:center}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:10px;
+  font-weight:600;
+  padding:3px 9px;
+  border-radius:20px;
+  letter-spacing:0.03em;
+  white-space:nowrap;
+}
+.badge-green{background:var(--accent-light);color:var(--accent)}
+.badge-amber{background:var(--accent2-light);color:var(--accent2)}
+.badge-red{background:var(--danger-light);color:var(--danger)}
+.badge-gray{background:var(--bg2);color:var(--text3)}
+.badge-info{background:var(--info-light);color:var(--info)}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* ── SEARCH / FILTER BAR ── */
+.filter-bar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:12px 20px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface2);
+  flex-wrap:wrap;
+}
+.filter-bar input,.filter-bar select{
+  font-family:var(--font);
+  font-size:12px;
+  padding:7px 11px;
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  outline:none;
+  transition:border-color 0.15s;
+}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+.filter-bar input{min-width:180px}
+
+/* ── STAT ROW ── */
+.stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.stat-pill{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:8px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+}
+.stat-pill-label{color:var(--text3);font-size:11px}
+.stat-pill-value{font-weight:700;font-family:var(--font-mono);color:var(--text);font-size:13px}
+
+/* ── EMPTY STATE ── */
+.empty{
+  text-align:center;
+  padding:48px 20px;
+  color:var(--text3);
+}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:0.4}
+.empty-msg{font-size:13px;font-weight:500}
+.empty-sub{font-size:11px;margin-top:4px}
+
+/* ── TOAST ── */
+#toast-wrap{
+  position:fixed;bottom:20px;right:20px;
+  z-index:9999;
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.toast{
+  font-size:12px;font-weight:500;
+  padding:11px 16px;
+  border-radius:var(--radius-sm);
+  border:1px solid;
+  display:flex;align-items:center;gap:8px;
+  pointer-events:all;
+  font-family:var(--font);
+  min-width:220px;
+  animation:toastIn 0.22s ease;
+  box-shadow:var(--shadow-md);
+}
+.toast.ok{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+.toast.err{background:var(--surface);border-color:var(--danger);color:var(--danger)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ── CHART ROW 2COL ── */
+.chart-row-2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px}
+
+/* ── EXPORT PAGE ── */
+.export-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.export-card{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  text-align:center;
+  transition:all 0.2s;
+}
+.export-card:hover{background:var(--surface);box-shadow:var(--shadow)}
+.export-card-icon{font-size:32px;margin-bottom:12px}
+.export-card-title{font-weight:700;font-size:14px;margin-bottom:4px;font-family:var(--font-display)}
+.export-card-desc{font-size:11px;color:var(--text3);margin-bottom:14px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{width:60px}
+  .logo-mark,.logo-sub,.nav-section-label,.nav-item span,.sidebar-footer{display:none}
+  .nav-icon{margin:0}
+  .nav-item{justify-content:center;padding:12px}
+  .main{margin-left:60px}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .fg-3,.fg-4,.fg-5{grid-template-columns:1fr 1fr}
+  .chart-row-2{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .kpi-row{grid-template-columns:1fr}
+  .fg-2,.fg-3,.fg-4,.fg-5{grid-template-columns:1fr}
+  .content{padding:16px}
+}
+</style>
 </head>
 <body>
-<div class="app-container">
-  <div class="top-nav">
-    <div class="logo"><h2>Pet<span>Sys</span> ERP</h2></div>
-    <div class="nav-links" id="navLinks">
-      <button class="nav-btn active" data-section="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
-      <button class="nav-btn" data-section="clientes"><i class="fas fa-users"></i> Clientes</button>
-      <button class="nav-btn" data-section="estoque"><i class="fas fa-boxes"></i> Estoque</button>
-      <button class="nav-btn" data-section="movimentacoes"><i class="fas fa-exchange-alt"></i> Movimentações</button>
-      <button class="nav-btn" data-section="servicos"><i class="fas fa-cut"></i> Serviços</button>
-      <button class="nav-btn" data-section="exportar"><i class="fas fa-file-excel"></i> Exportar</button>
+
+<div id="toast-wrap"></div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Pet<span>Sys</span></div>
+      <div class="logo-sub">ERP · PetShop</div>
     </div>
-  </div>
-  <div class="main-content" id="mainContent">
-    <!-- dynamic sections rendered by JS -->
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <button class="nav-item active" data-section="dashboard">
+        <span class="nav-icon">▤</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-section="clientes">
+        <span class="nav-icon">◉</span>
+        <span>Clientes</span>
+      </button>
+      <div class="nav-section-label">Operações</div>
+      <button class="nav-item" data-section="estoque">
+        <span class="nav-icon">▦</span>
+        <span>Estoque</span>
+      </button>
+      <button class="nav-item" data-section="movimentacoes">
+        <span class="nav-icon">⇅</span>
+        <span>Movimentações</span>
+      </button>
+      <button class="nav-item" data-section="servicos">
+        <span class="nav-icon">✂</span>
+        <span>Serviços</span>
+      </button>
+      <div class="nav-section-label">Sistema</div>
+      <button class="nav-item" data-section="exportar">
+        <span class="nav-icon">↓</span>
+        <span>Exportar</span>
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <strong>PetSys v2.0</strong>
+      Gestão Inteligente
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbarDate"></div>
+        <div class="avatar">PS</div>
+      </div>
+    </div>
+    <div class="content" id="mainContent"></div>
   </div>
 </div>
 
 <script>
-  // ---------- DATA STRUCTURES ----------
-  let clientes = JSON.parse(localStorage.getItem('petshop_clientes')) || [];
-  let estoque = JSON.parse(localStorage.getItem('petshop_estoque')) || [];
-  let servicos = JSON.parse(localStorage.getItem('petshop_servicos')) || [];
-  let movimentos = JSON.parse(localStorage.getItem('petshop_movimentos')) || [];
+// ── DATA ──
+let clientes    = JSON.parse(localStorage.getItem('ps_clientes'))     || [];
+let estoque     = JSON.parse(localStorage.getItem('ps_estoque'))      || [];
+let servicos    = JSON.parse(localStorage.getItem('ps_servicos'))     || [];
+let movimentos  = JSON.parse(localStorage.getItem('ps_movimentos'))   || [];
 
-  // Helper: persist all
-  function persistAll() {
-    localStorage.setItem('petshop_clientes', JSON.stringify(clientes));
-    localStorage.setItem('petshop_estoque', JSON.stringify(estoque));
-    localStorage.setItem('petshop_servicos', JSON.stringify(servicos));
-    localStorage.setItem('petshop_movimentos', JSON.stringify(movimentos));
-  }
+const servicosBase = [
+  {nome:'Banho',base:45},
+  {nome:'Tosa',base:50},
+  {nome:'Consulta',base:90},
+  {nome:'Banho + Tosa',base:85},
+  {nome:'Vacinação',base:70},
+  {nome:'Hospedagem',base:120},
+  {nome:'Adestramento',base:80},
+  {nome:'Exame clínico',base:110}
+];
 
-  // predefined service types with base price
-  const servicosBase = [
-    { nome: "Banho", base: 45.0 },
-    { nome: "Tosa", base: 50.0 },
-    { nome: "Consulta", base: 90.0 },
-    { nome: "Banho + Tosa", base: 85.0 },
-    { nome: "Vacinação", base: 70.0 },
-    { nome: "Hospedagem", base: 120.0 }
-  ];
-  const MARKUP = 1.5;
+function save(){
+  localStorage.setItem('ps_clientes',JSON.stringify(clientes));
+  localStorage.setItem('ps_estoque',JSON.stringify(estoque));
+  localStorage.setItem('ps_servicos',JSON.stringify(servicos));
+  localStorage.setItem('ps_movimentos',JSON.stringify(movimentos));
+}
 
-  // helpers
-  function formatMoney(val) { return `R$ ${val.toFixed(2)}`; }
-  function calcServicePrice(produtoId, quantidadeUsada, servicoBase) {
-    const produto = estoque.find(p => p.id == produtoId);
-    const custoProd = produto ? (produto.custoUnitario * quantidadeUsada) : 0;
-    const precoFinal = servicoBase + (custoProd * MARKUP);
-    return { custoProd, precoFinal, lucro: precoFinal - custoProd, margem: precoFinal ? ((precoFinal - custoProd)/precoFinal)*100 : 0 };
-  }
+// ── UTILS ──
+const R$  = v => `R$ ${(+v).toFixed(2).replace('.',',')}`;
+const pct = v => `${(+v).toFixed(1)}%`;
+const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('pt-BR') : '—';
+const fmtDT   = iso => iso ? new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+const uid     = () => Date.now() + Math.random();
 
-  // update stock when service uses product
-  function consumirProduto(produtoId, qtd) {
-    const idx = estoque.findIndex(p => p.id == produtoId);
-    if(idx !== -1 && estoque[idx].quantidade >= qtd) {
-      estoque[idx].quantidade -= qtd;
-      persistAll();
-      return true;
+function toast(msg, type='ok'){
+  const w = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type==='ok'?'✓':'✕'}</span> ${msg}`;
+  w.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+// ── DATE ──
+function setDate(){
+  const d = new Date();
+  document.getElementById('topbarDate').textContent =
+    d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+}
+setDate();
+
+// ── CHARTS ──
+let _charts = {};
+function destroyChart(id){ if(_charts[id]){ _charts[id].destroy(); delete _charts[id]; } }
+
+// ── NAVIGATION ──
+const pageTitles = {
+  dashboard:'Dashboard',
+  clientes:'Clientes & Tutores',
+  estoque:'Controle de Estoque',
+  movimentacoes:'Movimentações',
+  servicos:'Serviços',
+  exportar:'Exportar Dados'
+};
+
+function nav(section){
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    b.classList.toggle('active', b.dataset.section===section);
+  });
+  document.getElementById('pageTitle').textContent = pageTitles[section]||section;
+  Object.keys(_charts).forEach(destroyChart);
+  const renders = {dashboard:renderDashboard,clientes:renderClientes,estoque:renderEstoque,movimentacoes:renderMovimentacoes,servicos:renderServicos,exportar:renderExportar};
+  if(renders[section]) renders[section]();
+}
+
+document.querySelectorAll('.nav-item').forEach(b=>{
+  b.addEventListener('click',()=>nav(b.dataset.section));
+});
+
+// ── KPIs ──
+function getKPIs(){
+  const receita       = servicos.reduce((s,x)=>s+x.preco,0);
+  const custo         = servicos.reduce((s,x)=>s+x.custoProdutos,0);
+  const lucro         = receita - custo;
+  const margem        = receita ? (lucro/receita)*100 : 0;
+  const ticket        = servicos.length ? receita/servicos.length : 0;
+  const qtdConsumida  = servicos.reduce((s,x)=>s+x.quantidade,0);
+  const estoqueQtd    = estoque.reduce((s,p)=>s+p.quantidade,0);
+  const giro          = estoqueQtd ? qtdConsumida/(estoqueQtd+0.001) : 0;
+  const estoqueValor  = estoque.reduce((s,p)=>s+(p.custoUnitario*p.quantidade),0);
+  let diffs=[];
+  clientes.forEach(c=>{
+    const v=servicos.filter(s=>s.clienteId===c.id).sort((a,b)=>new Date(a.data)-new Date(b.data));
+    for(let i=1;i<v.length;i++){
+      const d=(new Date(v[i].data)-new Date(v[i-1].data))/(86400000);
+      if(d>0) diffs.push(d);
     }
-    return false;
+  });
+  const tempoMedio = diffs.length ? diffs.reduce((a,b)=>a+b,0)/diffs.length : 0;
+  const baixoEstoque = estoque.filter(p=>p.quantidade<10).length;
+  return {receita,custo,lucro,margem,ticket,giro,estoqueValor,tempoMedio,baixoEstoque,totalServicos:servicos.length,totalClientes:clientes.length};
+}
+
+function getReceitaDiaria(){
+  const map={};
+  servicos.forEach(s=>{
+    const d=s.data.slice(0,10);
+    map[d]=(map[d]||0)+s.preco;
+  });
+  const days=[];
+  for(let i=29;i>=0;i--){
+    const dt=new Date(); dt.setDate(dt.getDate()-i);
+    const k=dt.toISOString().slice(0,10);
+    days.push({label:`${dt.getDate()}/${dt.getMonth()+1}`,value:map[k]||0});
   }
+  return days;
+}
 
-  // registro serviço com validação estoque
-  function registrarServico(clienteId, servicoNome, produtoId, quantidadeUsada) {
-    const cliente = clientes.find(c => c.id == clienteId);
-    if(!cliente) return { error: "Cliente não encontrado" };
-    const servicoTipo = servicosBase.find(s => s.nome === servicoNome);
-    if(!servicoTipo) return { error: "Serviço inválido" };
-    const produto = estoque.find(p => p.id == produtoId);
-    if(!produto && quantidadeUsada > 0) return { error: "Produto não existe" };
-    if(produto && produto.quantidade < quantidadeUsada) return { error: "Estoque insuficiente" };
-    const { custoProd, precoFinal, lucro, margem } = calcServicePrice(produtoId, quantidadeUsada, servicoTipo.base);
-    if(produto && quantidadeUsada > 0) consumirProduto(produtoId, quantidadeUsada);
-    const novoServico = {
-      id: Date.now(),
-      clienteId: cliente.id,
-      clienteNome: cliente.nome,
-      servicoNome,
-      produtoUtilizado: produto ? produto.nome : "Nenhum",
-      produtoId: produtoId || null,
-      quantidade: quantidadeUsada,
-      custoProdutos: custoProd,
-      preco: precoFinal,
-      lucro: lucro,
-      margem: margem,
-      data: new Date().toISOString()
-    };
-    servicos.push(novoServico);
-    // atualizar ultima visita do cliente
-    cliente.ultimaVisita = new Date().toISOString();
-    cliente.totalServicos = (cliente.totalServicos || 0) + 1;
-    persistAll();
-    return { success: true, servico: novoServico };
-  }
+function getTopServicos(){
+  const map={};
+  servicos.forEach(s=>{ map[s.servicoNome]=(map[s.servicoNome]||0)+1; });
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,6);
+}
 
-  // atualizar KPIs e gráfico
-  let revenueChart = null;
+// ── DASHBOARD ──
+function renderDashboard(){
+  const K=getKPIs();
+  const days=getReceitaDiaria();
+  const top=getTopServicos();
 
-  function getKPIs() {
-    const receitaTotal = servicos.reduce((sum, s) => sum + s.preco, 0);
-    const custoTotalProd = servicos.reduce((sum, s) => sum + s.custoProdutos, 0);
-    const margemBrutaVal = receitaTotal - custoTotalProd;
-    const margemPercent = receitaTotal ? (margemBrutaVal / receitaTotal) * 100 : 0;
-    const numServicos = servicos.length;
-    const ticketMedio = numServicos ? receitaTotal / numServicos : 0;
-    const totalProdConsumido = servicos.reduce((acc, s) => acc + s.quantidade, 0);
-    const consumoMedio = numServicos ? totalProdConsumido / numServicos : 0;
-    // giro estoque: quantidade total consumida / estoque médio (simplificado: estoque médio = total valor / custo médio, mas giro simples qtd consumida / media quantidade disponivel)
-    const estoqueTotalQtd = estoque.reduce((acc, p) => acc + p.quantidade, 0);
-    const giro = estoqueTotalQtd ? totalProdConsumido / (estoqueTotalQtd + 0.001) : 0;
-    // tempo médio entre visitas: para clientes com mais de 1 serviço
-    let diffs = [];
-    clientes.forEach(c => {
-      const visits = servicos.filter(s => s.clienteId === c.id).sort((a,b)=> new Date(a.data) - new Date(b.data));
-      for(let i=1; i<visits.length; i++) {
-        const diffDays = (new Date(visits[i].data) - new Date(visits[i-1].data)) / (1000*3600*24);
-        if(diffDays>0) diffs.push(diffDays);
+  const html=`
+    <div class="section-header">
+      <div><div class="section-heading">Visão Geral</div><div class="section-sub">Dados em tempo real do sistema</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Receita Total</div><div class="kpi-value">${R$(K.receita)}</div><div class="kpi-badge up">✓ ${K.totalServicos} serv.</div><div class="kpi-accent">💰</div></div>
+      <div class="kpi"><div class="kpi-label">Margem Bruta</div><div class="kpi-value">${pct(K.margem)}</div><div class="kpi-badge ${K.margem>40?'up':K.margem>20?'neutral':'warn'}">${R$(K.lucro)} lucro</div><div class="kpi-accent">📊</div></div>
+      <div class="kpi"><div class="kpi-label">Ticket Médio</div><div class="kpi-value">${R$(K.ticket)}</div><div class="kpi-badge neutral">${K.totalClientes} clientes</div><div class="kpi-accent">🎫</div></div>
+      <div class="kpi"><div class="kpi-label">Estoque em Caixa</div><div class="kpi-value">${R$(K.estoqueValor)}</div><div class="kpi-badge ${K.baixoEstoque>0?'warn':'up'}">${K.baixoEstoque} c/ baixo estoque</div><div class="kpi-accent">📦</div></div>
+    </div>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="kpi"><div class="kpi-label">Custo Produtos</div><div class="kpi-value" style="font-size:20px">${R$(K.custo)}</div></div>
+      <div class="kpi"><div class="kpi-label">Giro de Estoque</div><div class="kpi-value" style="font-size:20px">${K.giro.toFixed(2)}×</div></div>
+      <div class="kpi"><div class="kpi-label">Retorno Médio</div><div class="kpi-value" style="font-size:20px">${K.tempoMedio>0?K.tempoMedio.toFixed(0)+' dias':'—'}</div></div>
+      <div class="kpi"><div class="kpi-label">Total Serviços</div><div class="kpi-value" style="font-size:20px">${K.totalServicos}</div></div>
+    </div>
+    <div class="chart-row-2">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Receita — Últimos 30 Dias</div>
+          <span class="badge badge-green">linha temporal</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartReceita"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Top Serviços</div>
+          <span class="badge badge-gray">volume</span>
+        </div>
+        <div class="chart-wrap"><canvas id="chartTop"></canvas></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML=html;
+
+  // Chart 1 — receita diária
+  const ctx1=document.getElementById('chartReceita').getContext('2d');
+  _charts.receita=new Chart(ctx1,{
+    type:'line',
+    data:{
+      labels:days.map(d=>d.label),
+      datasets:[{
+        label:'Receita (R$)',
+        data:days.map(d=>d.value),
+        borderColor:'#2d6a4f',
+        backgroundColor:'rgba(45,106,79,0.06)',
+        borderWidth:2,
+        tension:0.4,
+        fill:true,
+        pointRadius:0,
+        pointHoverRadius:5,
+        pointHoverBackgroundColor:'#2d6a4f'
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'DM Mono',size:10},color:'#9c978e',maxTicksLimit:8}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'DM Mono',size:10},color:'#9c978e',callback:v=>`R$${v}`}}
+      }
+    }
+  });
+
+  // Chart 2 — top serviços
+  if(top.length){
+    const ctx2=document.getElementById('chartTop').getContext('2d');
+    _charts.top=new Chart(ctx2,{
+      type:'doughnut',
+      data:{
+        labels:top.map(t=>t[0]),
+        datasets:[{
+          data:top.map(t=>t[1]),
+          backgroundColor:['#2d6a4f','#c17b3f','#1a5276','#7d3c98','#c0392b','#d4700a'],
+          borderWidth:0,
+          hoverOffset:6
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11},color:'#5c574f',padding:12,boxWidth:10,boxHeight:10}}}
       }
     });
-    const tempoMedioVisitas = diffs.length ? diffs.reduce((a,b)=>a+b,0)/diffs.length : 0;
-    return { receitaTotal, custoTotalProd, margemBrutaVal, margemPercent, ticketMedio, consumoMedio, giro, tempoMedioVisitas, numServicos };
+  }else{
+    document.getElementById('chartTop').parentElement.innerHTML='<div class="empty"><div class="empty-icon">✂</div><div class="empty-msg">Nenhum serviço ainda</div></div>';
   }
+}
 
-  function getReceitaPorDia() {
-    const last30 = [];
-    for(let i=29; i>=0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate()-i);
-      const dateStr = d.toISOString().slice(0,10);
-      const total = servicos.filter(s => s.data.slice(0,10) === dateStr).reduce((acc,s)=>acc+s.preco,0);
-      last30.push({date: dateStr.slice(5), revenue: total});
-    }
-    return last30;
-  }
-
-  function renderDashboard() {
-    const kpis = getKPIs();
-    const receitaDiaria = getReceitaPorDia();
-    const html = `
-      <div class="kpi-grid">
-        <div class="kpi-card"><h4>Receita Total</h4><div class="kpi-value">${formatMoney(kpis.receitaTotal)}</div></div>
-        <div class="kpi-card"><h4>Custo Produtos</h4><div class="kpi-value">${formatMoney(kpis.custoTotalProd)}</div></div>
-        <div class="kpi-card"><h4>Margem Bruta</h4><div class="kpi-value">${formatMoney(kpis.margemBrutaVal)}</div><div class="kpi-sub">${kpis.margemPercent.toFixed(1)}%</div></div>
-        <div class="kpi-card"><h4>Ticket Médio</h4><div class="kpi-value">${formatMoney(kpis.ticketMedio)}</div></div>
-        <div class="kpi-card"><h4>Consumo Médio Prod/Serv</h4><div class="kpi-value">${kpis.consumoMedio.toFixed(2)} un</div></div>
-        <div class="kpi-card"><h4>Giro Estoque</h4><div class="kpi-value">${kpis.giro.toFixed(2)}</div></div>
-        <div class="kpi-card"><h4>Tempo Médio Visitas</h4><div class="kpi-value">${kpis.tempoMedioVisitas.toFixed(1)} dias</div></div>
-        <div class="kpi-card"><h4>Total Serviços</h4><div class="kpi-value">${kpis.numServicos}</div></div>
-      </div>
-      <div class="chart-row"><canvas id="revenueChartCanvas" width="400" height="200" style="max-height:300px; width:100%"></canvas></div>
-    `;
-    document.getElementById('mainContent').innerHTML = html;
-    const ctx = document.getElementById('revenueChartCanvas').getContext('2d');
-    if(revenueChart) revenueChart.destroy();
-    revenueChart = new Chart(ctx, {
-      type: 'line',
-      data: { labels: receitaDiaria.map(d=>d.date), datasets: [{ label: 'Receita diária (R$)', data: receitaDiaria.map(d=>d.revenue), borderColor: '#2c7a6e', tension: 0.3, fill: false }] },
-      options: { responsive: true, maintainAspectRatio: true }
-    });
-  }
-
-  function renderClientes() {
-    const searchHtml = `<div class="filter-bar"><input type="text" id="searchCliente" class="search-input" placeholder="Buscar por nome..."></div>`;
-    let tableRows = clientes.map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.email}</td><td>${new Date(c.dataCadastro).toLocaleDateString()}</td><td>${c.totalServicos||0}</td><td>${c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString() : '--'}</td><td><button class="small danger" onclick="excluirCliente(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-    const form = `
-      <div class="section-card">
-        <div class="section-title"><i class="fas fa-user-plus"></i> Novo Cliente</div>
-        <div class="form-grid">
-          <div class="form-group"><label>Nome</label><input type="text" id="cliNome" placeholder="Nome completo"></div>
-          <div class="form-group"><label>Telefone</label><input type="text" id="cliTelefone"></div>
-          <div class="form-group"><label>Email</label><input type="email" id="cliEmail"></div>
-          <div class="form-group"><button class="primary" id="addClienteBtn"><i class="fas fa-save"></i> Salvar</button></div>
+// ── CLIENTES ──
+function renderClientes(){
+  const html=`
+    <div class="section-header">
+      <div><div class="section-heading">Clientes & Tutores</div><div class="section-sub">${clientes.length} cadastrado${clientes.length!==1?'s':''}</div></div>
+      <button class="btn btn-primary" onclick="toggleForm('formNovoCliente')">+ Novo Cliente</button>
+    </div>
+    <div class="panel" id="formNovoCliente" style="display:none;margin-bottom:20px">
+      <div class="panel-header"><div class="panel-title"><span class="dot"></span>Cadastrar Cliente</div></div>
+      <div class="panel-body">
+        <div class="form-grid fg-3">
+          <div class="field"><label>Nome completo</label><input id="cliNome" placeholder="Ex: Ana Silva"></div>
+          <div class="field"><label>Telefone</label><input id="cliTel" placeholder="(11) 99999-0000"></div>
+          <div class="field"><label>E-mail</label><input id="cliEmail" type="email" placeholder="ana@email.com"></div>
+        </div>
+        <div class="form-grid fg-3" style="margin-top:12px">
+          <div class="field"><label>Pet (nome)</label><input id="cliPet" placeholder="Ex: Thor, Mel..."></div>
+          <div class="field"><label>Espécie</label><select id="cliEspecie"><option value="">—</option><option>Cão</option><option>Gato</option><option>Coelho</option><option>Pássaro</option><option>Outro</option></select></div>
+          <div class="field"><label>Raça</label><input id="cliRaca" placeholder="Opcional"></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="addCliente()">Salvar Cliente</button>
+          <button class="btn btn-ghost" onclick="toggleForm('formNovoCliente')">Cancelar</button>
         </div>
       </div>
-      <div class="section-card"><div class="section-title"><i class="fas fa-list"></i> Lista de Clientes</div>${searchHtml}<div style="overflow-x:auto"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Cadastro</th><th>Serviços</th><th>Última Visita</th><th></th></tr></thead><tbody id="clientesTbody">${tableRows}</tbody></table></div></div>
-    `;
-    document.getElementById('mainContent').innerHTML = form;
-    document.getElementById('addClienteBtn').onclick = () => {
-      const nome = document.getElementById('cliNome').value.trim();
-      if(!nome) return alert("Nome obrigatório");
-      const novo = { id: Date.now(), nome, telefone: document.getElementById('cliTelefone').value, email: document.getElementById('cliEmail').value, dataCadastro: new Date().toISOString(), totalServicos: 0, ultimaVisita: null };
-      clientes.push(novo);
-      persistAll();
-      renderClientes();
-    };
-    document.getElementById('searchCliente').addEventListener('keyup', (e) => {
-      const term = e.target.value.toLowerCase();
-      const filtered = clientes.filter(c => c.nome.toLowerCase().includes(term));
-      const tbody = document.getElementById('clientesTbody');
-      tbody.innerHTML = filtered.map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.email}</td><td>${new Date(c.dataCadastro).toLocaleDateString()}</td><td>${c.totalServicos||0}</td><td>${c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString() : '--'}</td><td><button class="small danger" onclick="excluirCliente(${c.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('');
-    });
-  }
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        <input id="searchCli" placeholder="🔍  Buscar por nome ou pet…" oninput="filterClientes()">
+        <select id="filterEsp" onchange="filterClientes()">
+          <option value="">Todas espécies</option>
+          <option>Cão</option><option>Gato</option><option>Coelho</option><option>Pássaro</option><option>Outro</option>
+        </select>
+        <span class="badge badge-gray" id="cliCount">${clientes.length} clientes</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Cliente</th><th>Pet</th><th>Espécie</th><th>Telefone</th><th>Cadastro</th><th>Serviços</th><th>Última visita</th><th></th></tr></thead>
+          <tbody id="cliTbody">${renderCliRows(clientes)}</tbody>
+        </table>
+        ${clientes.length===0?emptyState('◉','Nenhum cliente cadastrado','Clique em "+ Novo Cliente" para começar'):''}
+      </div>
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML=html;
+}
 
-  window.excluirCliente = (id) => { clientes = clientes.filter(c=>c.id !== id); persistAll(); renderClientes(); };
+function renderCliRows(list){
+  return list.map(c=>`
+    <tr>
+      <td><span class="td-bold">${c.nome}</span></td>
+      <td>${c.pet||'—'}</td>
+      <td>${c.especie?`<span class="badge badge-green">${c.especie}</span>`:'—'}</td>
+      <td class="td-muted">${c.telefone||'—'}</td>
+      <td class="td-mono td-muted">${fmtDate(c.dataCadastro)}</td>
+      <td><span class="badge badge-gray">${c.totalServicos||0}</span></td>
+      <td class="td-mono td-muted">${fmtDate(c.ultimaVisita)}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-danger btn-xs" onclick="delCliente(${c.id})">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
 
-  function renderEstoque() {
-    const totalEstoqueValor = estoque.reduce((acc,p)=> acc + (p.custoUnitario * p.quantidade),0);
-    const kpis = getKPIs();
-    const consumoMedio = kpis.consumoMedio;
-    const giro = kpis.giro;
-    const form = `
-      <div class="section-card"><div class="section-title"><i class="fas fa-cubes"></i> Adicionar Produto</div><div class="form-grid"><div class="form-group"><label>Nome</label><input id="prodNome"></div><div class="form-group"><label>Custo unitário (R$)</label><input id="prodCusto" type="number" step="0.01"></div><div class="form-group"><label>Quantidade inicial</label><input id="prodQtd" type="number" step="1" value="0"></div><div class="form-group"><button class="primary" id="addProdBtn">+ Adicionar</button></div></div></div>
-      <div class="section-card"><div class="section-title">KPIs Estoque</div><div class="kpi-grid" style="margin-bottom:0"><div class="kpi-card"><h4>Valor total em estoque</h4><div class="kpi-value">${formatMoney(totalEstoqueValor)}</div></div><div class="kpi-card"><h4>Consumo médio por serviço</h4><div class="kpi-value">${consumoMedio.toFixed(2)} un</div></div><div class="kpi-card"><h4>Giro de estoque</h4><div class="kpi-value">${giro.toFixed(2)}</div></div></div></div>
-      <div class="section-card"><div class="section-title">Produtos</div><div style="overflow-x:auto"><table><thead><tr><th>Produto</th><th>Custo Unit.</th><th>Quantidade</th><th>Valor Total</th><th>Status</th><th>Ações</th></tr></thead><tbody id="estoqueTbody">${estoque.map(p => `<tr><td>${p.nome}</td><td>${formatMoney(p.custoUnitario)}</td><td>${p.quantidade}</td><td>${formatMoney(p.custoUnitario * p.quantidade)}</td><td>${p.quantidade < 10 ? '<span class="badge low">Baixo estoque</span>' : '<span class="badge">OK</span>'}</td><td><button class="small danger" onclick="excluirProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div></div>
-    `;
-    document.getElementById('mainContent').innerHTML = form;
-    document.getElementById('addProdBtn').onclick = () => {
-      const nome = document.getElementById('prodNome').value.trim();
-      const custo = parseFloat(document.getElementById('prodCusto').value);
-      const qtd = parseInt(document.getElementById('prodQtd').value);
-      if(!nome || isNaN(custo) || isNaN(qtd)) return alert("Preencha todos os campos");
-      estoque.push({ id: Date.now(), nome, custoUnitario: custo, quantidade: qtd });
-      persistAll();
-      renderEstoque();
-    };
-  }
-  window.excluirProduto = (id) => { estoque = estoque.filter(p=>p.id !== id); persistAll(); renderEstoque(); };
-
-  function renderMovimentacoes() {
-    const form = `<div class="section-card"><div class="section-title"><i class="fas fa-dolly"></i> Registrar Movimentação</div><div class="form-grid"><div class="form-group"><label>Produto</label><select id="movProduto">${estoque.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('')}</select></div><div class="form-group"><label>Tipo</label><select id="movTipo"><option>Entrada</option><option>Saída</option></select></div><div class="form-group"><label>Quantidade</label><input id="movQtd" type="number" step="1"></div><div class="form-group"><label>Observação</label><input id="movObs"></div><div class="form-group"><button class="primary" id="addMovBtn">Registrar</button></div></div></div>
-    <div class="section-card"><div class="section-title">Histórico</div><div class="filter-bar"><input id="filterDataMov" placeholder="Filtrar data (YYYY-MM-DD)"><select id="filterTipoMov"><option value="">Todos</option><option>Entrada</option><option>Saída</option></select><button id="limparFiltrosMov">Limpar</button></div><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Obs</th></tr></thead><tbody id="movTbody">${movimentos.map(m=>`<tr><td>${new Date(m.data).toLocaleString()}</td><td>${m.produtoNome}</td><td>${m.tipo}</td><td>${m.quantidade}</td><td>${m.obs||''}</td></tr>`).join('')}</tbody></table></div></div>`;
-    document.getElementById('mainContent').innerHTML = form;
-    document.getElementById('addMovBtn').onclick = () => {
-      const prodId = parseInt(document.getElementById('movProduto').value);
-      const produto = estoque.find(p=>p.id===prodId);
-      if(!produto) return alert("Produto não encontrado");
-      const tipo = document.getElementById('movTipo').value;
-      let qtd = parseInt(document.getElementById('movQtd').value);
-      if(isNaN(qtd) || qtd<=0) return alert("Quantidade válida");
-      const obs = document.getElementById('movObs').value;
-      if(tipo === "Saída" && produto.quantidade < qtd) return alert("Estoque insuficiente");
-      if(tipo === "Entrada") produto.quantidade += qtd;
-      else produto.quantidade -= qtd;
-      movimentos.push({ id: Date.now(), produtoId: prodId, produtoNome: produto.nome, tipo, quantidade: qtd, obs, data: new Date().toISOString() });
-      persistAll();
-      renderMovimentacoes();
-    };
-    const filtrar = () => {
-      let filtered = [...movimentos];
-      const dataFiltro = document.getElementById('filterDataMov').value;
-      const tipoFiltro = document.getElementById('filterTipoMov').value;
-      if(dataFiltro) filtered = filtered.filter(m=>m.data.slice(0,10) === dataFiltro);
-      if(tipoFiltro) filtered = filtered.filter(m=>m.tipo === tipoFiltro);
-      const tbody = document.getElementById('movTbody');
-      tbody.innerHTML = filtered.map(m=>`<tr><td>${new Date(m.data).toLocaleString()}</td><td>${m.produtoNome}</td><td>${m.tipo}</td><td>${m.quantidade}</td><td>${m.obs||''}</td></tr>`).join('');
-    };
-    document.getElementById('filterDataMov').addEventListener('input', filtrar);
-    document.getElementById('filterTipoMov').addEventListener('change', filtrar);
-    document.getElementById('limparFiltrosMov').onclick = () => { document.getElementById('filterDataMov').value = ''; document.getElementById('filterTipoMov').value = ''; filtrar(); };
-  }
-
-  function renderServicos() {
-    const clientesOpt = clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
-    const produtosOpt = `<option value="">Nenhum</option>`+estoque.map(p=>`<option value="${p.id}">${p.nome} (R$ ${p.custoUnitario.toFixed(2)})</option>`).join('');
-    const servicosOpt = servicosBase.map(s=>`<option value="${s.nome}">${s.nome} - base R$ ${s.base.toFixed(2)}</option>`).join('');
-    const historicoRows = servicos.map(s=>`<tr><td>${new Date(s.data).toLocaleDateString()}</td><td>${s.clienteNome}</td><td>${s.servicoNome}</td><td>${s.produtoUtilizado}</td><td>${s.quantidade}</td><td>${formatMoney(s.custoProdutos)}</td><td>${formatMoney(s.preco)}</td><td>${formatMoney(s.lucro)}</td><td>${s.margem.toFixed(1)}%</td></tr>`).join('');
-    const html = `
-      <div class="section-card"><div class="section-title"><i class="fas fa-bath"></i> Registrar Serviço</div><div class="form-grid"><div class="form-group"><label>Cliente</label><select id="servCliente">${clientesOpt}</select></div><div class="form-group"><label>Tipo Serviço</label><select id="servTipo">${servicosOpt}</select></div><div class="form-group"><label>Produto utilizado</label><select id="servProduto">${produtosOpt}</select></div><div class="form-group"><label>Quantidade</label><input id="servQtd" type="number" value="0" step="1"></div><div class="form-group"><button class="primary" id="registrarServBtn">Registrar Serviço</button></div></div></div>
-      <div class="section-card"><div class="section-title">Histórico de Serviços</div><div class="filter-bar"><input id="filtroClienteServ" placeholder="Filtrar por cliente"><input id="filtroDataServ" type="date" placeholder="Data"><button id="limparFiltroServ">Limpar</button></div><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Cliente</th><th>Serviço</th><th>Produto</th><th>Qtd</th><th>Custo</th><th>Preço</th><th>Lucro</th><th>Margem</th></tr></thead><tbody id="servicosTbody">${historicoRows}</tbody></table></div></div>
-    `;
-    document.getElementById('mainContent').innerHTML = html;
-    document.getElementById('registrarServBtn').onclick = () => {
-      const clienteId = parseInt(document.getElementById('servCliente').value);
-      const servNome = document.getElementById('servTipo').value;
-      const prodIdVal = document.getElementById('servProduto').value;
-      const produtoId = prodIdVal ? parseInt(prodIdVal) : null;
-      const qtd = parseInt(document.getElementById('servQtd').value) || 0;
-      const res = registrarServico(clienteId, servNome, produtoId, qtd);
-      if(res.error) alert(res.error);
-      else { alert("Serviço registrado com sucesso!"); renderServicos(); }
-    };
-    function filterServicos() {
-      let filtered = [...servicos];
-      const cliFilter = document.getElementById('filtroClienteServ').value.toLowerCase();
-      const dateFilter = document.getElementById('filtroDataServ').value;
-      if(cliFilter) filtered = filtered.filter(s=>s.clienteNome.toLowerCase().includes(cliFilter));
-      if(dateFilter) filtered = filtered.filter(s=>s.data.slice(0,10) === dateFilter);
-      const tbody = document.getElementById('servicosTbody');
-      tbody.innerHTML = filtered.map(s=>`<tr><td>${new Date(s.data).toLocaleDateString()}</td><td>${s.clienteNome}</td><td>${s.servicoNome}</td><td>${s.produtoUtilizado}</td><td>${s.quantidade}</td><td>${formatMoney(s.custoProdutos)}</td><td>${formatMoney(s.preco)}</td><td>${formatMoney(s.lucro)}</td><td>${s.margem.toFixed(1)}%</td></tr>`).join('');
-    }
-    document.getElementById('filtroClienteServ').addEventListener('keyup', filterServicos);
-    document.getElementById('filtroDataServ').addEventListener('change', filterServicos);
-    document.getElementById('limparFiltroServ').onclick = () => { document.getElementById('filtroClienteServ').value = ''; document.getElementById('filtroDataServ').value = ''; filterServicos(); };
-  }
-
-  function exportarExcel() {
-    const wb = XLSX.utils.book_new();
-    const clientesSheet = XLSX.utils.json_to_sheet(clientes.map(c=>({ ID:c.id, Nome:c.nome, Telefone:c.telefone, Email:c.email, Cadastro:c.dataCadastro, TotalServicos:c.totalServicos, UltimaVisita:c.ultimaVisita })));
-    const estoqueSheet = XLSX.utils.json_to_sheet(estoque);
-    const servicosSheet = XLSX.utils.json_to_sheet(servicos);
-    const movSheet = XLSX.utils.json_to_sheet(movimentos);
-    XLSX.utils.book_append_sheet(wb, clientesSheet, "Clientes");
-    XLSX.utils.book_append_sheet(wb, estoqueSheet, "Estoque");
-    XLSX.utils.book_append_sheet(wb, servicosSheet, "Servicos");
-    XLSX.utils.book_append_sheet(wb, movSheet, "Movimentacoes");
-    XLSX.writeFile(wb, `petshop_export_${new Date().toISOString().slice(0,19)}.xlsx`);
-  }
-
-  function renderExportar() {
-    document.getElementById('mainContent').innerHTML = `<div class="section-card"><div class="section-title"><i class="fas fa-download"></i> Exportação de Dados</div><p>Exporte todas as tabelas do sistema para Excel (XLSX).</p><button id="exportExcelBtn" class="primary" style="margin-top:1rem;"><i class="fas fa-file-excel"></i> Exportar para Excel</button></div>`;
-    document.getElementById('exportExcelBtn').onclick = exportarExcel;
-  }
-
-  function switchSection(section) {
-    if(section === 'dashboard') renderDashboard();
-    else if(section === 'clientes') renderClientes();
-    else if(section === 'estoque') renderEstoque();
-    else if(section === 'movimentacoes') renderMovimentacoes();
-    else if(section === 'servicos') renderServicos();
-    else if(section === 'exportar') renderExportar();
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      if(btn.dataset.section === section) btn.classList.add('active');
-      else btn.classList.remove('active');
-    });
-  }
-
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchSection(btn.dataset.section));
+function filterClientes(){
+  const q=(document.getElementById('searchCli').value||'').toLowerCase();
+  const esp=document.getElementById('filterEsp').value;
+  const filtered=clientes.filter(c=>{
+    const nm=(c.nome||'').toLowerCase().includes(q)||(c.pet||'').toLowerCase().includes(q);
+    const sp=!esp||(c.especie===esp);
+    return nm&&sp;
   });
-  // default dashboard
-  switchSection('dashboard');
+  document.getElementById('cliTbody').innerHTML=renderCliRows(filtered);
+  document.getElementById('cliCount').textContent=`${filtered.length} clientes`;
+}
+
+function addCliente(){
+  const nome=document.getElementById('cliNome').value.trim();
+  if(!nome){ toast('Nome é obrigatório','err'); return; }
+  clientes.push({
+    id:uid(),nome,
+    telefone:document.getElementById('cliTel').value,
+    email:document.getElementById('cliEmail').value,
+    pet:document.getElementById('cliPet').value,
+    especie:document.getElementById('cliEspecie').value,
+    raca:document.getElementById('cliRaca').value,
+    dataCadastro:new Date().toISOString(),
+    totalServicos:0,ultimaVisita:null
+  });
+  save(); toast(`Cliente "${nome}" cadastrado`); renderClientes();
+}
+
+window.delCliente=id=>{
+  clientes=clientes.filter(c=>c.id!==id); save(); renderClientes(); toast('Cliente removido','err');
+};
+
+// ── ESTOQUE ──
+function renderEstoque(){
+  const K=getKPIs();
+  const html=`
+    <div class="section-header">
+      <div><div class="section-heading">Controle de Estoque</div><div class="section-sub">${estoque.length} produto${estoque.length!==1?'s':''} · ${estoque.filter(p=>p.quantidade<10).length} com baixo estoque</div></div>
+      <button class="btn btn-primary" onclick="toggleForm('formNovoProd')">+ Novo Produto</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat-pill"><div class="stat-pill-label">Valor em estoque</div><div class="stat-pill-value">${R$(K.estoqueValor)}</div></div>
+      <div class="stat-pill"><div class="stat-pill-label">Consumo médio / serv.</div><div class="stat-pill-value">${K.giro.toFixed(2)} un</div></div>
+      <div class="stat-pill"><div class="stat-pill-label">Giro de estoque</div><div class="stat-pill-value">${K.giro.toFixed(2)}×</div></div>
+      <div class="stat-pill"><div class="stat-pill-label">Itens críticos</div><div class="stat-pill-value" style="color:var(--danger)">${K.baixoEstoque}</div></div>
+    </div>
+    <div class="panel" id="formNovoProd" style="display:none;margin-bottom:20px">
+      <div class="panel-header"><div class="panel-title"><span class="dot amber"></span>Cadastrar Produto</div></div>
+      <div class="panel-body">
+        <div class="form-grid fg-4">
+          <div class="field"><label>Nome do produto</label><input id="pNome" placeholder="Ex: Shampoo Premium"></div>
+          <div class="field"><label>Custo unitário (R$)</label><input id="pCusto" type="number" step="0.01" min="0" placeholder="0,00"></div>
+          <div class="field"><label>Qtd. inicial</label><input id="pQtd" type="number" step="1" min="0" placeholder="0"></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="addProduto()">Adicionar</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        <input id="searchProd" placeholder="🔍  Buscar produto…" oninput="filterProdutos()">
+        <select id="filterEstatus" onchange="filterProdutos()">
+          <option value="">Todos</option>
+          <option value="ok">Estoque OK</option>
+          <option value="low">Baixo estoque</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Produto</th><th>Custo Unit.</th><th>Quantidade</th><th>Valor Total</th><th>Status</th><th></th></tr></thead>
+          <tbody id="prodTbody">${renderProdRows(estoque)}</tbody>
+        </table>
+        ${estoque.length===0?emptyState('▦','Nenhum produto no estoque','Cadastre produtos para começar a usar o sistema'):''}
+      </div>
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML=html;
+}
+
+function renderProdRows(list){
+  return list.map(p=>`
+    <tr>
+      <td class="td-bold">${p.nome}</td>
+      <td class="td-mono">${R$(p.custoUnitario)}</td>
+      <td class="td-mono">${p.quantidade}</td>
+      <td class="td-mono">${R$(p.custoUnitario*p.quantidade)}</td>
+      <td>${p.quantidade<5?'<span class="badge badge-red">Crítico</span>':p.quantidade<10?'<span class="badge badge-amber">Baixo</span>':'<span class="badge badge-green">OK</span>'}</td>
+      <td><button class="btn btn-danger btn-xs" onclick="delProduto(${p.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function filterProdutos(){
+  const q=(document.getElementById('searchProd').value||'').toLowerCase();
+  const st=document.getElementById('filterEstatus').value;
+  const f=estoque.filter(p=>{
+    const nm=(p.nome||'').toLowerCase().includes(q);
+    const s=!st||(st==='ok'?p.quantidade>=10:p.quantidade<10);
+    return nm&&s;
+  });
+  document.getElementById('prodTbody').innerHTML=renderProdRows(f);
+}
+
+function addProduto(){
+  const nome=document.getElementById('pNome').value.trim();
+  const custo=parseFloat(document.getElementById('pCusto').value);
+  const qtd=parseInt(document.getElementById('pQtd').value)||0;
+  if(!nome||isNaN(custo)||custo<0){ toast('Preencha nome e custo corretamente','err'); return; }
+  estoque.push({id:uid(),nome,custoUnitario:custo,quantidade:qtd});
+  save(); toast(`"${nome}" adicionado ao estoque`); renderEstoque();
+}
+
+window.delProduto=id=>{
+  estoque=estoque.filter(p=>p.id!==id); save(); renderEstoque(); toast('Produto removido','err');
+};
+
+// ── MOVIMENTAÇÕES ──
+function renderMovimentacoes(){
+  const html=`
+    <div class="section-header">
+      <div><div class="section-heading">Movimentações</div><div class="section-sub">${movimentos.length} registro${movimentos.length!==1?'s':''}</div></div>
+      <button class="btn btn-primary" onclick="toggleForm('formMov')">+ Registrar</button>
+    </div>
+    <div class="panel" id="formMov" style="display:none;margin-bottom:20px">
+      <div class="panel-header"><div class="panel-title"><span class="dot amber"></span>Nova Movimentação</div></div>
+      <div class="panel-body">
+        <div class="form-grid fg-4">
+          <div class="field"><label>Produto</label><select id="movProd">${estoque.map(p=>`<option value="${p.id}">${p.nome} (${p.quantidade} un)</option>`).join('')||'<option disabled>Sem produtos</option>'}</select></div>
+          <div class="field"><label>Tipo</label><select id="movTipo"><option>Entrada</option><option>Saída</option></select></div>
+          <div class="field"><label>Quantidade</label><input id="movQtd" type="number" min="1" step="1" placeholder="0"></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="addMovimento()">Registrar</button></div>
+        </div>
+        <div class="field" style="margin-top:10px;max-width:400px"><label>Observação (opcional)</label><input id="movObs" placeholder="Ex: Reposição mensal"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        <input id="filterMovData" type="date" onchange="filterMov()">
+        <select id="filterMovTipo" onchange="filterMov()">
+          <option value="">Todos os tipos</option>
+          <option>Entrada</option><option>Saída</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="clearMovFilter()">Limpar</button>
+        <span class="badge badge-gray" id="movCount">${movimentos.length} registros</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data / Hora</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Observação</th></tr></thead>
+          <tbody id="movTbody">${renderMovRows(movimentos)}</tbody>
+        </table>
+        ${movimentos.length===0?emptyState('⇅','Nenhuma movimentação','Registre entradas e saídas de estoque'):''}
+      </div>
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML=html;
+}
+
+function renderMovRows(list){
+  return [...list].reverse().map(m=>`
+    <tr>
+      <td class="td-mono td-muted">${fmtDT(m.data)}</td>
+      <td class="td-bold">${m.produtoNome}</td>
+      <td>${m.tipo==='Entrada'?'<span class="badge badge-green">Entrada</span>':'<span class="badge badge-amber">Saída</span>'}</td>
+      <td class="td-mono">${m.quantidade} un</td>
+      <td class="td-muted">${m.obs||'—'}</td>
+    </tr>`).join('');
+}
+
+function filterMov(){
+  const d=document.getElementById('filterMovData').value;
+  const t=document.getElementById('filterMovTipo').value;
+  const f=movimentos.filter(m=>(!d||m.data.slice(0,10)===d)&&(!t||m.tipo===t));
+  document.getElementById('movTbody').innerHTML=renderMovRows(f);
+  document.getElementById('movCount').textContent=`${f.length} registros`;
+}
+
+function clearMovFilter(){
+  document.getElementById('filterMovData').value='';
+  document.getElementById('filterMovTipo').value='';
+  filterMov();
+}
+
+function addMovimento(){
+  if(!estoque.length){ toast('Cadastre produtos primeiro','err'); return; }
+  const pId=document.getElementById('movProd').value;
+  const produto=estoque.find(p=>String(p.id)===String(pId));
+  if(!produto){ toast('Produto não encontrado','err'); return; }
+  const tipo=document.getElementById('movTipo').value;
+  const qtd=parseInt(document.getElementById('movQtd').value);
+  if(!qtd||qtd<1){ toast('Informe uma quantidade válida','err'); return; }
+  if(tipo==='Saída'&&produto.quantidade<qtd){ toast(`Estoque insuficiente. Disponível: ${produto.quantidade}un`,'err'); return; }
+  if(tipo==='Entrada') produto.quantidade+=qtd;
+  else produto.quantidade-=qtd;
+  movimentos.push({id:uid(),produtoId:produto.id,produtoNome:produto.nome,tipo,quantidade:qtd,obs:document.getElementById('movObs').value,data:new Date().toISOString()});
+  save(); toast(`Movimentação registrada`); renderMovimentacoes();
+}
+
+// ── SERVIÇOS ──
+function renderServicos(){
+  const html=`
+    <div class="section-header">
+      <div><div class="section-heading">Serviços</div><div class="section-sub">${servicos.length} serviço${servicos.length!==1?'s':''} realizados</div></div>
+      <button class="btn btn-primary" onclick="toggleForm('formServ')">+ Registrar Serviço</button>
+    </div>
+    <div class="panel" id="formServ" style="display:none;margin-bottom:20px">
+      <div class="panel-header"><div class="panel-title"><span class="dot"></span>Novo Serviço</div></div>
+      <div class="panel-body">
+        <div class="form-grid fg-3">
+          <div class="field"><label>Cliente</label><select id="srvCliente">${clientes.length?clientes.map(c=>`<option value="${c.id}">${c.nome}${c.pet?' · '+c.pet:''}</option>`).join(''):'<option disabled>Sem clientes</option>'}</select></div>
+          <div class="field"><label>Tipo de serviço</label><select id="srvTipo">${servicosBase.map(s=>`<option value="${s.nome}" data-base="${s.base}">${s.nome} — base ${R$(s.base)}</option>`).join('')}</select></div>
+          <div class="field"><label>Produto utilizado</label><select id="srvProd"><option value="">Nenhum</option>${estoque.map(p=>`<option value="${p.id}">${p.nome} · custo ${R$(p.custoUnitario)}</option>`).join('')}</select></div>
+        </div>
+        <div class="form-grid fg-3" style="margin-top:12px">
+          <div class="field"><label>Qtd. produto</label><input id="srvQtd" type="number" min="0" step="1" value="0"></div>
+          <div class="field"><label>Markup adicional (×)</label><input id="srvMarkup" type="number" min="1" step="0.1" value="1.5"></div>
+          <div class="field"><label>Observações</label><input id="srvObs" placeholder="Opcional"></div>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg2);border-radius:var(--radius-sm);font-size:12px;color:var(--text2)" id="previewPreco">
+          Selecione os dados para pré-visualizar o preço
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="registrarServico()">Confirmar Serviço</button>
+          <button class="btn btn-ghost" onclick="toggleForm('formServ')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        <input id="filterSrvCli" placeholder="🔍  Filtrar por cliente…" oninput="filterServicos()">
+        <input id="filterSrvData" type="date" onchange="filterServicos()">
+        <select id="filterSrvTipo" onchange="filterServicos()">
+          <option value="">Todos os serviços</option>
+          ${servicosBase.map(s=>`<option>${s.nome}</option>`).join('')}
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="clearSrvFilter()">Limpar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data</th><th>Cliente</th><th>Serviço</th><th>Produto</th><th>Qtd</th><th>Custo</th><th>Preço</th><th>Lucro</th><th>Margem</th></tr></thead>
+          <tbody id="srvTbody">${renderSrvRows(servicos)}</tbody>
+        </table>
+        ${servicos.length===0?emptyState('✂','Nenhum serviço registrado','Registre o primeiro atendimento do dia'):''}
+      </div>
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML=html;
+
+  // preview dinâmico
+  ['srvTipo','srvProd','srvQtd','srvMarkup'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('change',updatePreview);
+    if(el&&el.tagName==='INPUT') el.addEventListener('input',updatePreview);
+  });
+}
+
+function updatePreview(){
+  const sel=document.getElementById('srvTipo');
+  const opt=sel?.options[sel.selectedIndex];
+  const base=parseFloat(opt?.dataset.base||0);
+  const pId=document.getElementById('srvProd')?.value;
+  const qtd=parseFloat(document.getElementById('srvQtd')?.value)||0;
+  const markup=parseFloat(document.getElementById('srvMarkup')?.value)||1.5;
+  const prod=estoque.find(p=>String(p.id)===String(pId));
+  const custoProd=(prod?.custoUnitario||0)*qtd;
+  const preco=base+(custoProd*markup);
+  const lucro=preco-custoProd;
+  const margem=preco?(lucro/preco)*100:0;
+  document.getElementById('previewPreco').innerHTML=`
+    <span style="color:var(--text3)">Base: <b style="color:var(--text)">${R$(base)}</b></span> &nbsp;·&nbsp;
+    <span style="color:var(--text3)">Custo produtos: <b style="color:var(--text)">${R$(custoProd)}</b></span> &nbsp;·&nbsp;
+    <span style="color:var(--accent)">Preço final: <b>${R$(preco)}</b></span> &nbsp;·&nbsp;
+    <span style="color:var(--text3)">Margem: <b style="color:var(--text)">${pct(margem)}</b></span>
+  `;
+}
+
+function renderSrvRows(list){
+  return [...list].reverse().map(s=>`
+    <tr>
+      <td class="td-mono td-muted">${fmtDate(s.data)}</td>
+      <td class="td-bold">${s.clienteNome}</td>
+      <td><span class="badge badge-info">${s.servicoNome}</span></td>
+      <td class="td-muted">${s.produtoUtilizado||'—'}</td>
+      <td class="td-mono">${s.quantidade}</td>
+      <td class="td-mono td-muted">${R$(s.custoProdutos)}</td>
+      <td class="td-mono td-bold">${R$(s.preco)}</td>
+      <td class="td-mono" style="color:var(--accent)">${R$(s.lucro)}</td>
+      <td><span class="badge ${s.margem>50?'badge-green':s.margem>30?'badge-amber':'badge-red'}">${pct(s.margem)}</span></td>
+    </tr>`).join('');
+}
+
+function filterServicos(){
+  const q=(document.getElementById('filterSrvCli').value||'').toLowerCase();
+  const d=document.getElementById('filterSrvData').value;
+  const t=document.getElementById('filterSrvTipo').value;
+  const f=servicos.filter(s=>
+    (!(q)||(s.clienteNome||'').toLowerCase().includes(q))&&
+    (!d||s.data.slice(0,10)===d)&&
+    (!t||s.servicoNome===t)
+  );
+  document.getElementById('srvTbody').innerHTML=renderSrvRows(f);
+}
+
+function clearSrvFilter(){
+  document.getElementById('filterSrvCli').value='';
+  document.getElementById('filterSrvData').value='';
+  document.getElementById('filterSrvTipo').value='';
+  filterServicos();
+}
+
+function registrarServico(){
+  if(!clientes.length){ toast('Cadastre um cliente primeiro','err'); return; }
+  const cId=document.getElementById('srvCliente').value;
+  const cliente=clientes.find(c=>String(c.id)===String(cId));
+  if(!cliente){ toast('Cliente inválido','err'); return; }
+  const sel=document.getElementById('srvTipo');
+  const sNome=sel.value;
+  const base=parseFloat(sel.options[sel.selectedIndex].dataset.base);
+  const pId=document.getElementById('srvProd').value;
+  const qtd=parseFloat(document.getElementById('srvQtd').value)||0;
+  const markup=parseFloat(document.getElementById('srvMarkup').value)||1.5;
+  const prod=pId?estoque.find(p=>String(p.id)===String(pId)):null;
+  if(prod&&prod.quantidade<qtd){ toast(`Estoque insuficiente de "${prod.nome}". Disponível: ${prod.quantidade}`,'err'); return; }
+  const custoProd=(prod?.custoUnitario||0)*qtd;
+  const preco=base+(custoProd*markup);
+  const lucro=preco-custoProd;
+  const margem=preco?(lucro/preco)*100:0;
+  if(prod&&qtd>0){ prod.quantidade-=qtd; }
+  const s={
+    id:uid(),clienteId:cliente.id,clienteNome:cliente.nome,
+    servicoNome:sNome,
+    produtoUtilizado:prod?.nome||null,produtoId:prod?.id||null,
+    quantidade:qtd,custoProdutos:custoProd,
+    preco,lucro,margem,
+    obs:document.getElementById('srvObs').value,
+    data:new Date().toISOString()
+  };
+  servicos.push(s);
+  cliente.ultimaVisita=new Date().toISOString();
+  cliente.totalServicos=(cliente.totalServicos||0)+1;
+  save();
+  toast(`Serviço "${sNome}" registrado · ${R$(preco)}`);
+  renderServicos();
+}
+
+// ── EXPORTAR ──
+function renderExportar(){
+  const K=getKPIs();
+  const html=`
+    <div class="section-header">
+      <div><div class="section-heading">Exportar Dados</div><div class="section-sub">Todos os dados em formato XLSX</div></div>
+    </div>
+    <div class="stat-row" style="margin-bottom:20px">
+      <div class="stat-pill"><div class="stat-pill-label">Clientes</div><div class="stat-pill-value">${clientes.length}</div></div>
+      <div class="stat-pill"><div class="stat-pill-label">Produtos</div><div class="stat-pill-value">${estoque.length}</div></div>
+      <div class="stat-pill"><div class="stat-pill-label">Serviços</div><div class="stat-pill-value">${servicos.length}</div></div>
+      <div class="stat-pill"><div class="stat-pill-label">Movimentações</div><div class="stat-pill-value">${movimentos.length}</div></div>
+    </div>
+    <div class="export-grid">
+      <div class="export-card">
+        <div class="export-card-icon">📊</div>
+        <div class="export-card-title">Relatório Completo</div>
+        <div class="export-card-desc">Todas as tabelas em abas separadas: clientes, estoque, serviços e movimentações.</div>
+        <button class="btn btn-primary" onclick="exportExcel()">Exportar XLSX</button>
+      </div>
+      <div class="export-card">
+        <div class="export-card-icon">💰</div>
+        <div class="export-card-title">Relatório Financeiro</div>
+        <div class="export-card-desc">Resumo de receitas, custos, lucros e margens por período.</div>
+        <button class="btn btn-amber" onclick="exportFinanceiro()">Exportar CSV</button>
+      </div>
+      <div class="export-card">
+        <div class="export-card-icon">⚠️</div>
+        <div class="export-card-title">Limpar Dados</div>
+        <div class="export-card-desc">Remove todos os dados do sistema. Ação irreversível — exporte antes.</div>
+        <button class="btn btn-danger" onclick="clearAll()">Limpar tudo</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('mainContent').innerHTML=html;
+}
+
+function exportExcel(){
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(clientes),'Clientes');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(estoque),'Estoque');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(servicos),'Servicos');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(movimentos),'Movimentacoes');
+  XLSX.writeFile(wb,`petsys_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Arquivo exportado com sucesso');
+}
+
+function exportFinanceiro(){
+  const rows=servicos.map(s=>({Data:fmtDate(s.data),Cliente:s.clienteNome,Servico:s.servicoNome,Custo:s.custoProdutos.toFixed(2),Preco:s.preco.toFixed(2),Lucro:s.lucro.toFixed(2),Margem:s.margem.toFixed(1)+'%'}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Financeiro');
+  XLSX.writeFile(wb,`petsys_financeiro_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Relatório financeiro exportado');
+}
+
+function clearAll(){
+  if(!confirm('Tem certeza? Todos os dados serão apagados permanentemente.')) return;
+  clientes=[];estoque=[];servicos=[];movimentos=[];
+  save(); toast('Dados removidos'); renderExportar();
+}
+
+// ── HELPERS ──
+function toggleForm(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function emptyState(icon,msg,sub){
+  return `<div class="empty"><div class="empty-icon">${icon}</div><div class="empty-msg">${msg}</div><div class="empty-sub">${sub}</div></div>`;
+}
+
+// ── BOOT ──
+nav('dashboard');
 </script>
 </body>
 </html>
